@@ -1,0 +1,178 @@
+<?php
+
+/**
+ * ProcessWire 'Markup Css Selector Generator'  module
+ *
+ * Demonstrates the Module interface and how to add hooks.
+ * 
+ * ProcessWire 2.x 
+ * Copyright (C) 2014 by Hans-Jakob Bollinger 
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ * 
+ *
+ */
+
+class MarkupCssSelectorGenerator extends WireData implements Module {
+
+	public static function getModuleInfo() {
+
+		return array(
+			'title' => 'markup css selector generator', 
+			'version' => 101,
+			'summary' => 'Extract url segments, user agents and templates to set css classes according to them',
+			'href' => 'http://www.webbear.ch',
+			'singular' => true, 
+			'autoload' => true, 
+			);
+	}
+
+	/**
+	 * Initialize the module
+	 */
+	public function init() {
+
+	}
+	
+	public function render(array $options = array()) {
+		$defaults = array(
+			// default with class attribute name
+			'class' => true,
+			// are there any custom css classes - e.g. no-js
+			'customClasses' => '',
+			// selector name of the homepage
+			'home' => 'homepage'
+		);
+		$options = array_merge($defaults, $options);
+		$out='';
+		$page = wire('page');
+		$classes = array();
+		//get the segments
+		if ($page->id == 1) {
+			if ($page->path != "/") {
+				$segment1 = str_replace('/','', $page->path);
+				$classes[] = $options['home']."-$segment1";
+			} else {
+				$classes[] = $options['home'];
+			}
+		} else {
+			$segments = array();
+			$segments= explode( " ", trim(str_replace("/", " ", $page->path)));
+			for ($i=0; $i <= count($segments); $i++) {
+				$segment = $segments[$i];
+				$classes[] = (is_numeric(substr($segment,0,1))) ? 'n'.$segment : $segment;
+			}
+		}
+		// single page
+		$classes[] = "page-$page->id";
+		// template name
+		$classes[]= "t-" . $page->template->name;
+		// ususally this is the section
+		if ($page->rootParent->id != 1) {
+			$classes[] = "s-" . $page->rootParent->name;
+		}
+		// fetch the browser
+		$classes[] = $this->_getUserAgents();
+		if ($options['customClasses']) $classes[] = $options['customClasses'];
+		$allClasses = implode(' ', $classes);
+		($options['class']) ? $out = " class='$allClasses'" : $out = $allClasses;
+		return $out;
+	}
+	
+	//some lightweight browser detection
+	private function _getUserAgents() {
+		$browser = (isset($_SERVER['HTTP_USER_AGENT'])) ? strtolower($_SERVER['HTTP_USER_AGENT']) : 'unknown';
+		$ua = array();
+		
+		if(!in_array('browser', $disable) && $browser != 'unknown')
+		{			
+			if(strpos($browser, 'lynx') !== false)
+			{
+				$ua[] = 'lynx';
+			}
+			elseif(strpos($browser, 'chrome') !== false)
+			{
+				$ua[] = 'chrome';
+			}
+			elseif(strpos($browser, 'safari') !== false)
+			{
+				$ua[] = 'safari';
+			
+				if(strpos($browser, 'ipod') !== false)
+				{
+					$ua[] = 'ipod';
+				}
+				elseif(strpos($browser, 'iphone') !== false)
+				{
+					$ua[] = 'iphone';
+				}
+				elseif(strpos($browser, 'ipad') !== false)
+				{
+					$ua[] = 'ipad';
+				}
+			}
+			elseif(strpos($browser, 'firefox') !== false)
+			{
+				$ua[] = 'firefox';
+			}
+			elseif(strpos($browser, 'gecko') !== false)
+			{
+				if (strpos($browser, 'trident') !== false) {
+					$ua[] = 'ie11';
+				} else {
+					$ua[] = 'gecko';
+				}
+			}
+			elseif(strpos($browser, 'msie') !== false)
+			{	if(strpos($browser, 'msie 11') !== false)
+				{
+					$ua[] = 'ie11';
+				}
+				elseif(strpos($browser, 'msie 10') !== false)
+				{
+					$ua[] = 'ie10';
+				}
+				elseif(strpos($browser, 'msie 10') !== false)
+				{
+					$ua[] = 'ie10';
+				}
+				elseif(strpos($browser, 'msie 9') !== false)
+				{
+					$ua[] = 'ie9';
+				}
+				elseif(strpos($browser, 'msie 8') !== false)
+				{
+					$ua[] = 'ie8';
+				}
+				elseif(strpos($browser, 'msie 7') !== false)
+				{
+					$ua[] = 'ie7';
+				}	
+				elseif(strpos($browser, 'msie 6') !== false)
+				{
+					$ua[] = 'ie6';
+				}	
+				elseif(strpos($browser, 'msie 5') !== false)
+				{
+					$ua[] = 'ie5';
+				}
+				else
+				{
+					$ua[] = 'ie';
+				}
+			}
+			elseif(strpos($browser, 'trident') !== false) {
+				$ua[] = 'ie11';
+			}
+			elseif(strpos($browser, 'opera') !== false)
+			{
+				$ua[] = 'opera';
+			}
+			elseif(strpos($browser, 'nav') !== false && strpos($browser, 'mozilla/4.') !== false)
+			{
+				$ua[] = 'navigator';
+			}
+		}
+		$ua = implode(' ', $ua);
+		return $ua;
+	}	
+}
