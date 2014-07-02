@@ -40,7 +40,9 @@ class MarkupCssSelectorGenerator extends WireData implements Module {
 			// are there any custom css classes - e.g. no-js
 			'customClasses' => '',
 			// selector name of the homepage
-			'home' => 'homepage'
+			'home' => 'homepage',
+			//lightweight browser detection no use with ProCache
+			'browserDetection' => false
 		);
 		$options = array_merge($defaults, $options);
 		$out='';
@@ -82,94 +84,95 @@ class MarkupCssSelectorGenerator extends WireData implements Module {
 	private function _getUserAgents() {
 		$browser = (isset($_SERVER['HTTP_USER_AGENT'])) ? strtolower($_SERVER['HTTP_USER_AGENT']) : 'unknown';
 		$ua = array();
-		
+		if($options['browserDetection']) {
 		if(!in_array('browser', $disable) && $browser != 'unknown')
 		{			
-			if(strpos($browser, 'lynx') !== false)
-			{
-				$ua[] = 'lynx';
-			}
-			elseif(strpos($browser, 'chrome') !== false)
-			{
-				$ua[] = 'chrome';
-			}
-			elseif(strpos($browser, 'safari') !== false)
-			{
-				$ua[] = 'safari';
-			
-				if(strpos($browser, 'ipod') !== false)
+					if(strpos($browser, 'lynx') !== false)
 				{
-					$ua[] = 'ipod';
+					$ua[] = 'lynx';
 				}
-				elseif(strpos($browser, 'iphone') !== false)
+				elseif(strpos($browser, 'chrome') !== false)
 				{
-					$ua[] = 'iphone';
+					$ua[] = 'chrome';
 				}
-				elseif(strpos($browser, 'ipad') !== false)
+				elseif(strpos($browser, 'safari') !== false)
 				{
-					$ua[] = 'ipad';
+					$ua[] = 'safari';
+				
+					if(strpos($browser, 'ipod') !== false)
+					{
+						$ua[] = 'ipod';
+					}
+					elseif(strpos($browser, 'iphone') !== false)
+					{
+						$ua[] = 'iphone';
+					}
+					elseif(strpos($browser, 'ipad') !== false)
+					{
+						$ua[] = 'ipad';
+					}
 				}
-			}
-			elseif(strpos($browser, 'firefox') !== false)
-			{
-				$ua[] = 'firefox';
-			}
-			elseif(strpos($browser, 'gecko') !== false)
-			{
-				if (strpos($browser, 'trident') !== false) {
+				elseif(strpos($browser, 'firefox') !== false)
+				{
+					$ua[] = 'firefox';
+				}
+				elseif(strpos($browser, 'gecko') !== false)
+				{
+					if (strpos($browser, 'trident') !== false) {
+						$ua[] = 'ie11';
+					} else {
+						$ua[] = 'gecko';
+					}
+				}
+				elseif(strpos($browser, 'msie') !== false)
+				{	if(strpos($browser, 'msie 11') !== false)
+					{
+						$ua[] = 'ie11';
+					}
+					elseif(strpos($browser, 'msie 10') !== false)
+					{
+						$ua[] = 'ie10';
+					}
+					elseif(strpos($browser, 'msie 10') !== false)
+					{
+						$ua[] = 'ie10';
+					}
+					elseif(strpos($browser, 'msie 9') !== false)
+					{
+						$ua[] = 'ie9';
+					}
+					elseif(strpos($browser, 'msie 8') !== false)
+					{
+						$ua[] = 'ie8';
+					}
+					elseif(strpos($browser, 'msie 7') !== false)
+					{
+						$ua[] = 'ie7';
+					}	
+					elseif(strpos($browser, 'msie 6') !== false)
+					{
+						$ua[] = 'ie6';
+					}	
+					elseif(strpos($browser, 'msie 5') !== false)
+					{
+						$ua[] = 'ie5';
+					}
+					else
+					{
+						$ua[] = 'ie';
+					}
+				}
+				elseif(strpos($browser, 'trident') !== false) {
 					$ua[] = 'ie11';
-				} else {
-					$ua[] = 'gecko';
 				}
-			}
-			elseif(strpos($browser, 'msie') !== false)
-			{	if(strpos($browser, 'msie 11') !== false)
+				elseif(strpos($browser, 'opera') !== false)
 				{
-					$ua[] = 'ie11';
+					$ua[] = 'opera';
 				}
-				elseif(strpos($browser, 'msie 10') !== false)
+				elseif(strpos($browser, 'nav') !== false && strpos($browser, 'mozilla/4.') !== false)
 				{
-					$ua[] = 'ie10';
+					$ua[] = 'navigator';
 				}
-				elseif(strpos($browser, 'msie 10') !== false)
-				{
-					$ua[] = 'ie10';
-				}
-				elseif(strpos($browser, 'msie 9') !== false)
-				{
-					$ua[] = 'ie9';
-				}
-				elseif(strpos($browser, 'msie 8') !== false)
-				{
-					$ua[] = 'ie8';
-				}
-				elseif(strpos($browser, 'msie 7') !== false)
-				{
-					$ua[] = 'ie7';
-				}	
-				elseif(strpos($browser, 'msie 6') !== false)
-				{
-					$ua[] = 'ie6';
-				}	
-				elseif(strpos($browser, 'msie 5') !== false)
-				{
-					$ua[] = 'ie5';
-				}
-				else
-				{
-					$ua[] = 'ie';
-				}
-			}
-			elseif(strpos($browser, 'trident') !== false) {
-				$ua[] = 'ie11';
-			}
-			elseif(strpos($browser, 'opera') !== false)
-			{
-				$ua[] = 'opera';
-			}
-			elseif(strpos($browser, 'nav') !== false && strpos($browser, 'mozilla/4.') !== false)
-			{
-				$ua[] = 'navigator';
 			}
 		}
 		$ua = implode(' ', $ua);
