@@ -1,3 +1,5 @@
+this repo has a new home ssh://git@codeberg.org/webbear/MarkupCssSelectorGenerator.git
+
 #Markup Css Selector Generator 1.01
 
 ## Basic Usage
